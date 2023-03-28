@@ -12,14 +12,14 @@ const selectProjectType = async () => {
         message: "Please select the ProjectType you want create",
         choices: [
             { title: 'Backend', value: 'Backend' },
-            { title: 'Fullstack', value: 'Fullstack' },
+            { title: 'Fullstack', value: 'Fullstack' , disabled: true, warn: "will be supported soon"},
         ],
     });
     return type.projectType;
 };
 
-const selectBackendFrame = async () => {
-    if (!existsSync(path.join(process.cwd(), "backend"))) {
+const selectBackendFrame = async (projectPath) => {
+    if (!existsSync(path.join(projectPath, "backend"))) {
         mkdir(path.join(process.cwd(), "backend"));
     }
     const type = await prompts({
@@ -42,25 +42,29 @@ const selectChainNetwork = async () => {
         message: "Please select the Chain you want create",
         choices: [
             { title: 'Ethereum', value: 'Ethereum' },
-            { title: 'Polygon', value: 'Polygon' },
-            { title: 'Tron', value: 'Tron' },
+            { title: 'Polygon', value: 'Polygon' , disabled: true, warn: "will be supported soon"},
+            { title: 'Tron', value: 'Tron' , disabled: true, warn: "will be supported soon"},
         ],
     });
     let networkList;
     switch (chain.chain) {
         case 'Ethereum' :
             networkList = [
-                {title: 'mainnet', value: 'mainnet'},
+                {title: 'mainnet', value: 'eth-mainnet'},
                 {title: 'goerli', value: 'goerli'},
                 {tile: 'sepolia', value: 'sepolia'},
             ]
             break;
         case 'Polygon' :
             networkList = [
-                {title: 'mainnet', value: 'mainnet'},
-                {title: 'testnet', value: 'testnet'},
+                {title: 'mainnet', value: 'poly-mainnet'},
+                {title: 'testnet', value: 'poly-testnet'},
             ]
             break;
+        case 'Tron' : 
+            networkList = [
+                {tile: 'mainnet', value: 'tron-mainnet'},
+            ]
     };
     const network = await prompts({
         type: "select",
@@ -68,10 +72,10 @@ const selectChainNetwork = async () => {
         message: "Please select the Network you want create",
         choices: networkList,
     });
-    return chain.chain, network.network;
+    return network.network;
 };
 
-const selectContract = async() => {
+const selectContract = async(backendFrame) => {
     const contract = await prompts({
         type: "select",
         name: "contract",
@@ -83,25 +87,27 @@ const selectContract = async() => {
             { title: 'default', value: 'default' },
         ],
     });
-    let erc20, erc721, erc1155;
+    let erc20, erc721, erc1155, contractName;
     switch (contract.contract) {
         case 'ERC20' : 
             erc20 = await selectERC20();
-            console.log(erc20);
+            contractName = erc20.name;
             createERC(path.join(process.cwd(), "backend"), 'ERC20', erc20);
-            createDeploy(path.join(process.cwd(), "backend"), "Hardhat", erc20.name);
             break;
         case 'ERC721' : 
             erc721 = await selectERC721();
-            // createERC721();
+            contractName = erc721.name; 
+            createERC(path.join(process.cwd(), "backend"), 'ERC721', erc721);
             break;
         case 'ERC1155' : 
             erc1155 = await selectERC1155();
-            // createERC1155();
+            contractName = erc1155.name;
+            createERC(path.join(process.cwd(), "backend"), 'ERC1155', erc1155);
             break;
         default : 
             break;
     }
+    createDeploy(path.join(process.cwd(), "backend"), backendFrame, contractName);
 };
 
 const selectERC20 = async() => {
@@ -140,7 +146,6 @@ const selectERC20 = async() => {
             ],
         }
     ]);
-    console.log(erc20['name']);
     return erc20;
 }
 
@@ -166,7 +171,7 @@ const selectERC721 = async() => {
         },
         {
             type: "multiselect",
-            name: "selectFeature",
+            name: "feature",
             message: "Please select the Feature you want create",
             choices: [
                 { title: 'Mintable', value: 'Mintable' },
@@ -197,7 +202,7 @@ const selectERC1155 = async() => {
         },
         {
             type: "multiselect",
-            name: "selectFeature",
+            name: "feature",
             message: "Please select the Feature you want create",
             choices: [
                 { title: 'Mintable', value: 'Mintable' },

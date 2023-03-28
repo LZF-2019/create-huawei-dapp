@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import prompts from 'prompts';
 import { createDappProject } from './scripts/workflow/createDappProject.js'
 
 console.log(
@@ -14,8 +15,18 @@ console.log(
 );
 
 async function main() {
-    createDappProject();
-
+    try {
+        const project = await prompts({
+            type: "text",
+            name: "name",
+            message: "Please input the project name you want create",
+            initial: "my-dapp",
+        });
+        createDappProject(project.name);
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 
 main();

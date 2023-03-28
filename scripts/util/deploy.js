@@ -18,29 +18,6 @@ const genHardhatDeploymentScript = (name) => {
 `.trim();
 };
 
-const genHardhatConfigScript = (network) => {
-    return `
-    require("@nomicfoundation/hardhat-toolbox");
-    require("dotenv").config()
-
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
-    const PRIVATE_KEY = process.env.PRIVATE_KEY;
-    const HW_TOKEN = process.env.HW_TOKEN
-    /** @type import('hardhat/config').HardhatUserConfig */
-    module.exports = {
-    solidity: "0.8.17",
-    networks: {
-        ${network}: {
-            url: "",
-            accounts: [PRIVATE_KEY],
-            httpHeaders: {"X-Auth-Token": HW_TOKEN}
-        },
-    }
-    };
-    `.trim();
-}
-
 const genTruffleDeploymentScript = (name) => {
 	return `
     var MyContract = artifacts.require("${name}");
