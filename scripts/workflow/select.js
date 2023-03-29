@@ -1,9 +1,12 @@
 import prompts from 'prompts';
-import { createERC } from '../util/contract.js';
-import { createDeploy } from '../util/deploy.js'
 import path from 'path';
 import fs, { existsSync } from "fs";
+
 import { mkdir } from '../util/mkdir.js';
+import { createERC } from '../util/contract.js';
+import { createDeploy } from '../util/deploy.js';
+import { createConfig } from '../util/config.js';
+import { createDepend } from '../util/depend.js';
 
 const selectProjectType = async () => {
     const type = await prompts({
@@ -20,7 +23,7 @@ const selectProjectType = async () => {
 
 const selectBackendFrame = async (projectPath) => {
     if (!existsSync(path.join(projectPath, "backend"))) {
-        mkdir(path.join(process.cwd(), "backend"));
+        mkdir(path.join(projectPath, "backend"));
     }
     const type = await prompts({
         type: "select",
@@ -28,7 +31,7 @@ const selectBackendFrame = async (projectPath) => {
         message: "Please select the BackendFrame you want create",
         choices: [
             { title: 'Hardhat', value: 'Hardhat' },
-            { title: 'Foundry', value: 'Foundry' },
+            { title: 'Foundry', value: 'Foundry' , disabled: true, warn: "will be supported soon"},
             { title: 'Truffle', value: 'Truffle' }
         ],
     });
@@ -50,20 +53,20 @@ const selectChainNetwork = async () => {
     switch (chain.chain) {
         case 'Ethereum' :
             networkList = [
-                {title: 'mainnet', value: 'eth-mainnet'},
+                {title: 'mainnet', value: 'ethMainnet'},
                 {title: 'goerli', value: 'goerli'},
                 {tile: 'sepolia', value: 'sepolia'},
             ]
             break;
         case 'Polygon' :
             networkList = [
-                {title: 'mainnet', value: 'poly-mainnet'},
-                {title: 'testnet', value: 'poly-testnet'},
+                {title: 'mainnet', value: 'polyMainnet'},
+                {title: 'testnet', value: 'polyTestnet'},
             ]
             break;
         case 'Tron' : 
             networkList = [
-                {tile: 'mainnet', value: 'tron-mainnet'},
+                {tile: 'mainnet', value: 'tronMainnet'},
             ]
     };
     const network = await prompts({
@@ -75,7 +78,7 @@ const selectChainNetwork = async () => {
     return network.network;
 };
 
-const selectContract = async(backendFrame) => {
+const selectContract = async(projectPath, backendFrame, networkName) => {
     const contract = await prompts({
         type: "select",
         name: "contract",
@@ -92,22 +95,24 @@ const selectContract = async(backendFrame) => {
         case 'ERC20' : 
             erc20 = await selectERC20();
             contractName = erc20.name;
-            createERC(path.join(process.cwd(), "backend"), 'ERC20', erc20);
+            createERC(path.join(projectPath, "backend"), 'ERC20', erc20);
             break;
         case 'ERC721' : 
             erc721 = await selectERC721();
             contractName = erc721.name; 
-            createERC(path.join(process.cwd(), "backend"), 'ERC721', erc721);
+            createERC(path.join(projectPath, "backend"), 'ERC721', erc721);
             break;
         case 'ERC1155' : 
             erc1155 = await selectERC1155();
             contractName = erc1155.name;
-            createERC(path.join(process.cwd(), "backend"), 'ERC1155', erc1155);
+            createERC(path.join(projectPath, "backend"), 'ERC1155', erc1155);
             break;
         default : 
             break;
     }
-    createDeploy(path.join(process.cwd(), "backend"), backendFrame, contractName);
+    createDeploy(path.join(projectPath, "backend"), backendFrame, contractName);
+    createConfig(path.join(projectPath, "backend"), backendFrame, networkName);
+    createDepend(path.join(projectPath, "backend"), backendFrame);
 };
 
 const selectERC20 = async() => {

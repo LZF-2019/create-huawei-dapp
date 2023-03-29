@@ -9,23 +9,28 @@ const createDappProject = async (projectName) => {
         if (!existsSync(path.join(process.cwd(), projectName))) {
             mkdir(path.join(process.cwd(), projectName));
         }
-        createProject(projectType);
+        createProject(projectType, path.join(process.cwd(), projectName));
     } catch(error) {
         console.log(error);
     }
 };
 
 const createProject = async (projectType, projectPath) => {
-    switch (projectType) {
-        case 'Backend' : 
-            const backendFrame = await selectBackendFrame(projectPath);
-            const network  = await selectChainNetwork();
-            await selectContract(backendFrame);
-            break;
-        case 'Fullstack' : 
-            console.log('Fullstack');
-            break;
+    try {
+        switch (projectType) {
+            case 'Backend' : 
+                const backendFrame = await selectBackendFrame(projectPath);
+                const networkName  = await selectChainNetwork();
+                await selectContract(projectPath, backendFrame, networkName);
+                break;
+            case 'Fullstack' : 
+                console.log('Fullstack');
+                break;
+        }
+    } catch (error) {
+        console.log(error);
     }
+    
 }
 
 export { createDappProject };
