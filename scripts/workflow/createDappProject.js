@@ -5,11 +5,11 @@ import { selectProjectType, selectBackendFrame, selectChainNetwork, selectContra
 
 const createDappProject = async (projectName) => {
     try {
-        const projectType = await selectProjectType();
         if (!existsSync(path.join(process.cwd(), projectName))) {
             mkdir(path.join(process.cwd(), projectName));
         }
-        createProject(projectType, path.join(process.cwd(), projectName));
+        const projectType = await selectProjectType();
+        await createProject(projectType, path.join(process.cwd(), projectName));
     } catch(error) {
         console.log(error);
     }

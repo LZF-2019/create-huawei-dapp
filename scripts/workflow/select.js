@@ -3,10 +3,11 @@ import path from 'path';
 import fs, { existsSync } from "fs";
 
 import { mkdir } from '../util/mkdir.js';
-import { createERC } from '../util/contract.js';
+import { createContract } from '../util/contract.js';
 import { createDeploy } from '../util/deploy.js';
 import { createConfig } from '../util/config.js';
 import { createDepend } from '../util/depend.js';
+import { createTest } from '../util/test.js';
 
 const selectProjectType = async () => {
     const type = await prompts({
@@ -25,17 +26,17 @@ const selectBackendFrame = async (projectPath) => {
     if (!existsSync(path.join(projectPath, "backend"))) {
         mkdir(path.join(projectPath, "backend"));
     }
-    const type = await prompts({
+    const backendFrame = await prompts({
         type: "select",
         name: "backendFrame",
         message: "Please select the BackendFrame you want create",
         choices: [
             { title: 'Hardhat', value: 'Hardhat' },
             { title: 'Foundry', value: 'Foundry' , disabled: true, warn: "will be supported soon"},
-            { title: 'Truffle', value: 'Truffle' }
+            { title: 'Truffle', value: 'Truffle' , disabled: true}
         ],
-    });
-    return type.backendFrame; 
+    }).then((data) => data.backendFrame);
+    return backendFrame; 
 }
 
 const selectChainNetwork = async () => {
@@ -90,29 +91,26 @@ const selectContract = async(projectPath, backendFrame, networkName) => {
             { title: 'default', value: 'default' },
         ],
     });
-    let erc20, erc721, erc1155, contractName;
+    let contractInfo;
+    contractInfo = {"name": "Simple"};
     switch (contract.contract) {
         case 'ERC20' : 
-            erc20 = await selectERC20();
-            contractName = erc20.name;
-            createERC(path.join(projectPath, "backend"), 'ERC20', erc20);
+            contractInfo = await selectERC20();
             break;
         case 'ERC721' : 
-            erc721 = await selectERC721();
-            contractName = erc721.name; 
-            createERC(path.join(projectPath, "backend"), 'ERC721', erc721);
+            contractInfo = await selectERC721();
             break;
         case 'ERC1155' : 
-            erc1155 = await selectERC1155();
-            contractName = erc1155.name;
-            createERC(path.join(projectPath, "backend"), 'ERC1155', erc1155);
+            contractInfo = await selectERC1155();
             break;
         default : 
             break;
     }
-    createDeploy(path.join(projectPath, "backend"), backendFrame, contractName);
+    createContract(path.join(projectPath, "backend"), contract.contract, contractInfo);
+    createDeploy(path.join(projectPath, "backend"), backendFrame, contractInfo.name);
     createConfig(path.join(projectPath, "backend"), backendFrame, networkName);
     createDepend(path.join(projectPath, "backend"), backendFrame);
+    createTest(path.join(projectPath, "backend"), backendFrame);
 };
 
 const selectERC20 = async() => {

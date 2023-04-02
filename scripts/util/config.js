@@ -13,14 +13,14 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
 const HW_TOKEN = process.env.HW_TOKEN || '';
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-solidity: "0.8.17",
-networks: {
-    ${network}: {
-        url: "",
-        accounts: [PRIVATE_KEY],
-        httpHeaders: {"X-Auth-Token": HW_TOKEN}
-    },
-}
+    solidity: "0.8.17",
+    // networks: {
+    //     ${network}: {
+    //         url: "",
+    //         accounts: [PRIVATE_KEY],
+    //         httpHeaders: {"X-Auth-Token": HW_TOKEN}
+    //     },
+    // }
 };`.trim();
 };
 
@@ -41,15 +41,15 @@ module.exports = {
             port: 7545,            // Standard Ethereum port (default: none)
             network_id: "5777",       // Any network (default: none)
         },
-        ${network}: {
-            provider: function() {
-                return new HDWalletProvider({
-                    privateKeys: [PRIVATE_KEY], 
-                    providerOrUrl: ""
-                })
-            },
-            network_id: '*',
-        }
+        // ${network}: {
+        //     provider: function() {
+        //         return new HDWalletProvider({
+        //             privateKeys: [PRIVATE_KEY], 
+        //             providerOrUrl: ""
+        //         })
+        //     },
+        //     network_id: '*',
+        // }
     },
     // Configure your compilers
     compilers: {

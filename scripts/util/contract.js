@@ -56,7 +56,31 @@ const genERC1155Contract = (erc1155Info) => {
     return erc1155contractTemplate;
 }; 
 
-const createERC = (backendFolder, name, ercInfo) => {
+const genDefaultContract = () => {
+    return `
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.6;
+
+// Uncomment this line to use console.log
+// import "hardhat/console.sol";
+
+contract Simple {
+    uint256 private value;
+
+    event ValueChanged(uint256 newValue);
+
+    function set(uint256 newValue) public {
+        value = newValue;
+        emit ValueChanged(newValue);
+    }
+
+    function get() public view returns (uint256) {
+        return value;
+    }
+}`.trim();
+}
+
+const createContract = (backendFolder, name, ercInfo) => {
     let template;
     switch (name) {
         case 'ERC20' : 
@@ -67,6 +91,9 @@ const createERC = (backendFolder, name, ercInfo) => {
             break;
         case 'ERC1155' : 
             template = genERC1155Contract(ercInfo);
+            break;
+        case 'default' : 
+            template = genDefaultContract();
             break;
     }
 
@@ -81,4 +108,4 @@ const createERC = (backendFolder, name, ercInfo) => {
 	writeStream.end();
 };
 
-export { createERC }
+export { createContract }
