@@ -1,6 +1,5 @@
 import path from "path";
 import fs, {existsSync} from "fs";
-import { mkdir } from "./mkdir.js";
 
 const genHardhatConfigScript = (network) => {
     return `

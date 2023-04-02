@@ -1,36 +1,31 @@
 import path from 'path';
-import { existsSync } from 'fs';
-import { mkdir } from '../util/mkdir.js';
-import { selectProjectType, selectBackendFrame, selectChainNetwork, selectContract } from "./select.js";
 
-const createDappProject = async (projectName) => {
+import { onDelete } from './common.js';
+import { selectProjectName, selectProjectType, selectBackendFrame, selectChainNetwork, selectContract } from "./select.js";
+
+let projectName;
+const createDappProject = async () => {
     try {
-        if (!existsSync(path.join(process.cwd(), projectName))) {
-            mkdir(path.join(process.cwd(), projectName));
-        }
+        projectName = await selectProjectName();
         const projectType = await selectProjectType();
         await createProject(projectType, path.join(process.cwd(), projectName));
     } catch(error) {
+        onDelete(projectName);
         console.log(error);
     }
 };
 
 const createProject = async (projectType, projectPath) => {
-    try {
-        switch (projectType) {
-            case 'Backend' : 
-                const backendFrame = await selectBackendFrame(projectPath);
-                const networkName  = await selectChainNetwork();
-                await selectContract(projectPath, backendFrame, networkName);
-                break;
-            case 'Fullstack' : 
-                console.log('Fullstack');
-                break;
-        }
-    } catch (error) {
-        console.log(error);
+    switch (projectType) {
+        case 'Backend' : 
+            const backendFrame = await selectBackendFrame(projectPath);
+            const networkName  = await selectChainNetwork();
+            await selectContract(projectPath, backendFrame, networkName);
+            break;
+        case 'Fullstack' : 
+            console.log('Fullstack');
+            break;
     }
-    
 }
 
 export { createDappProject };

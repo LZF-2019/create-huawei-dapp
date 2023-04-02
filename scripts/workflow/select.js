@@ -2,15 +2,28 @@ import prompts from 'prompts';
 import path from 'path';
 import fs, { existsSync } from "fs";
 
-import { mkdir } from '../util/mkdir.js';
+import { onCancel, mkdir } from './common.js';
 import { createContract } from '../util/contract.js';
 import { createDeploy } from '../util/deploy.js';
 import { createConfig } from '../util/config.js';
 import { createDepend } from '../util/depend.js';
 import { createTest } from '../util/test.js';
 
+const selectProjectName = async () => {
+    const projectName = await prompts({
+        type: "text",
+        name: "name",
+        message: "Please input the project name you want create",
+        initial: "my-dapp",
+    }, { onCancel }).then((data) => data.name);
+    if (!existsSync(path.join(process.cwd(), projectName))) {
+        mkdir(path.join(process.cwd(), projectName));
+    }
+    return projectName;
+}
+
 const selectProjectType = async () => {
-    const type = await prompts({
+    const projectType = await prompts({
         type: "select",
         name: "projectType",
         message: "Please select the ProjectType you want create",
@@ -18,8 +31,8 @@ const selectProjectType = async () => {
             { title: 'Backend', value: 'Backend' },
             { title: 'Fullstack', value: 'Fullstack' , disabled: true, warn: "will be supported soon"},
         ],
-    });
-    return type.projectType;
+    }, { onCancel }).then((data) => data.projectType);
+    return projectType;
 };
 
 const selectBackendFrame = async (projectPath) => {
@@ -35,7 +48,7 @@ const selectBackendFrame = async (projectPath) => {
             { title: 'Foundry', value: 'Foundry' , disabled: true, warn: "will be supported soon"},
             { title: 'Truffle', value: 'Truffle' , disabled: true}
         ],
-    }).then((data) => data.backendFrame);
+    }, { onCancel }).then((data) => data.backendFrame);
     return backendFrame; 
 }
 
@@ -49,9 +62,9 @@ const selectChainNetwork = async () => {
             { title: 'Polygon', value: 'Polygon' , disabled: true, warn: "will be supported soon"},
             { title: 'Tron', value: 'Tron' , disabled: true, warn: "will be supported soon"},
         ],
-    });
+    }, { onCancel }).then((data) => data.chain);
     let networkList;
-    switch (chain.chain) {
+    switch (chain) {
         case 'Ethereum' :
             networkList = [
                 {title: 'mainnet', value: 'ethMainnet'},
@@ -75,8 +88,8 @@ const selectChainNetwork = async () => {
         name: "network",
         message: "Please select the Network you want create",
         choices: networkList,
-    });
-    return network.network;
+    }, { onCancel }).then((data) => data.network);
+    return network;
 };
 
 const selectContract = async(projectPath, backendFrame, networkName) => {
@@ -90,10 +103,10 @@ const selectContract = async(projectPath, backendFrame, networkName) => {
             { title: 'ERC1155', value: 'ERC1155' },
             { title: 'default', value: 'default' },
         ],
-    });
+    }, { onCancel }).then((data) => data.contract);
     let contractInfo;
     contractInfo = {"name": "Simple"};
-    switch (contract.contract) {
+    switch (contract) {
         case 'ERC20' : 
             contractInfo = await selectERC20();
             break;
@@ -103,10 +116,10 @@ const selectContract = async(projectPath, backendFrame, networkName) => {
         case 'ERC1155' : 
             contractInfo = await selectERC1155();
             break;
-        default : 
+        default :  
             break;
     }
-    createContract(path.join(projectPath, "backend"), contract.contract, contractInfo);
+    createContract(path.join(projectPath, "backend"), contract, contractInfo);
     createDeploy(path.join(projectPath, "backend"), backendFrame, contractInfo.name);
     createConfig(path.join(projectPath, "backend"), backendFrame, networkName);
     createDepend(path.join(projectPath, "backend"), backendFrame);
@@ -148,7 +161,7 @@ const selectERC20 = async() => {
                 { title: 'Snapshots', value: 'Snapshots' },
             ],
         }
-    ]);
+    ], { onCancel });
     return erc20;
 }
 
@@ -185,7 +198,7 @@ const selectERC721 = async() => {
                 { title: 'URI Storage', value: 'URI Storage' },
             ],
         }
-    ]);
+    ], { onCancel });
     return erc721;
 }
 
@@ -215,8 +228,8 @@ const selectERC1155 = async() => {
                 { title: 'Updatable URI', value: 'Updatable URI' },
             ],
         }
-    ]);
+    ], { onCancel });
     return erc1155;
 }
 
-export {selectProjectType, selectBackendFrame, selectChainNetwork, selectContract};
+export {selectProjectName, selectProjectType, selectBackendFrame, selectChainNetwork, selectContract};

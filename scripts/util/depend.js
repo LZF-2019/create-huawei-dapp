@@ -1,6 +1,5 @@
 import path from "path";
 import fs, {existsSync} from "fs";
-import { mkdir } from "./mkdir.js";
 
 const genHardhatDependScript = () => {
     return `
@@ -46,7 +45,7 @@ const genTruffleDependScript = () => {
 }`.trim();
 };
 
-const createDepend = (backendFolder, frameName) => {
+export const createDepend = (backendFolder, frameName) => {
     let content, dependFile;
     switch (frameName) {
         case 'Hardhat' : 
@@ -63,5 +62,3 @@ const createDepend = (backendFolder, frameName) => {
     writeStream.write(content);
 	writeStream.end();
 };
-
-export { createDepend };

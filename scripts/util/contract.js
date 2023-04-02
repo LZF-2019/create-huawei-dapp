@@ -1,7 +1,8 @@
-import { erc20, erc721, erc1155 } from "@openzeppelin/wizard";
-import { mkdir } from "./mkdir.js";
 import fs, { existsSync } from "fs";
 import path from 'path';
+import { erc20, erc721, erc1155 } from "@openzeppelin/wizard";
+
+import { mkdir } from "../workflow/common.js";
 
 const existStr = (s, strs) => {
     for (let i = 0; i < strs.length; i++) {

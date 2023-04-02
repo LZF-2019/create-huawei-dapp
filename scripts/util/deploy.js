@@ -1,6 +1,6 @@
 import path from "path";
 import fs, {existsSync} from "fs";
-import { mkdir } from "./mkdir.js";
+import { mkdir } from "../workflow/common.js";
 
 const genHardhatDeploymentScript = (name) => {
 	return `
@@ -27,7 +27,7 @@ module.exports = function(deployer) {
 `.trim();
 };
 
-const createDeploy = (backendFolder, frameName, contractName) => {
+export const createDeploy = (backendFolder, frameName, contractName) => {
     let content, deployPath, deployFile;
     switch (frameName) {
         case 'Hardhat' : 
@@ -50,5 +50,3 @@ const createDeploy = (backendFolder, frameName, contractName) => {
     writeStream.write(content);
 	writeStream.end();
 };
-
-export { createDeploy };
