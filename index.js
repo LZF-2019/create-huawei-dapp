@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 import chalk from 'chalk';
 import { createDappProject } from './scripts/workflow/createDappProject.js'
 

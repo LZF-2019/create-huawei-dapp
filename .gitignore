@@ -4,3 +4,4 @@ package-lock.json
 
 backend/
 my-dapp/
+dist/
