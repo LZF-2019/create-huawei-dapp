@@ -10528,7 +10528,7 @@ var chalkStderr = createChalk({ level: stderrColor ? stderrColor.level : 0 });
 var source_default = chalk;
 
 // scripts/workflow/createDappProject.js
-var import_path8 = __toESM(require("path"), 1);
+var import_path9 = __toESM(require("path"), 1);
 
 // scripts/workflow/common.js
 var import_fs = __toESM(require("fs"), 1);
@@ -10548,26 +10548,26 @@ var mkdir = (projectPath) => {
     console.log(e);
   }
 };
-function deleteall(path9) {
+function deleteall(path10) {
   var files = [];
-  if (import_fs.default.existsSync(path9)) {
-    files = import_fs.default.readdirSync(path9);
+  if (import_fs.default.existsSync(path10)) {
+    files = import_fs.default.readdirSync(path10);
     files.forEach(function(file, index) {
-      var curPath = path9 + "/" + file;
+      var curPath = path10 + "/" + file;
       if (import_fs.default.statSync(curPath).isDirectory()) {
         deleteall(curPath);
       } else {
         import_fs.default.unlinkSync(curPath);
       }
     });
-    import_fs.default.rmdirSync(path9);
+    import_fs.default.rmdirSync(path10);
   }
 }
 
 // scripts/workflow/select.js
 var import_prompts = __toESM(require_prompts3(), 1);
-var import_path7 = __toESM(require("path"), 1);
-var import_fs7 = __toESM(require("fs"), 1);
+var import_path8 = __toESM(require("path"), 1);
+var import_fs8 = __toESM(require("fs"), 1);
 
 // scripts/util/contract.js
 var import_fs2 = __toESM(require("fs"), 1);
@@ -10714,6 +10714,8 @@ var createDeploy = (backendFolder, frameName, contractName) => {
       deployPath = import_path3.default.join(backendFolder, "migrations");
       deployFile = "1_migration.js";
       break;
+    case "Foundry":
+      return;
   }
   if (!(0, import_fs3.existsSync)(deployPath)) {
     mkdir(deployPath);
@@ -10736,17 +10738,17 @@ require("dotenv").config();
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
-const HW_TOKEN = process.env.HW_TOKEN || '';
+const HUAWEI_CERT_KEY = process.env.HUAWEI_CERT_KEY || '';
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: "0.8.17",
-    // networks: {
-    //     ${network}: {
-    //         url: "",
-    //         accounts: [PRIVATE_KEY],
-    //         httpHeaders: {"X-Auth-Token": HW_TOKEN}
-    //     },
-    // }
+    networks: {
+        ${network}: {
+            // url: HUAWEI_CERT_KEY,
+            // accounts: [PRIVATE_KEY],
+            // httpHeaders: {"X-Auth-Token": HW_TOKEN}
+        },
+    }
 };`.trim();
 };
 var genTruffleConfigScript = (network) => {
@@ -10792,6 +10794,16 @@ module.exports = {
     }
 };`.trim();
 };
+var genFoundryConfigScript = () => {
+  return `
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['lib', 'node_modules']
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+`.trim();
+};
 var createConfig = (backendFolder, frameName, networkName) => {
   let content, configFile;
   switch (frameName) {
@@ -10802,6 +10814,10 @@ var createConfig = (backendFolder, frameName, networkName) => {
     case "Truffle":
       content = genTruffleConfigScript(networkName);
       configFile = "truffle-config.js";
+      break;
+    case "Foundry":
+      content = genFoundryConfigScript();
+      configFile = "foundry.toml";
       break;
   }
   const writeStream = import_fs4.default.createWriteStream(
@@ -10820,7 +10836,6 @@ var genHardhatDependScript = () => {
     "name": "backend",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
     "scripts": {
         "test": "echo \\"Error: no test specified\\" && exit 1"
     },
@@ -10842,7 +10857,6 @@ var genTruffleDependScript = () => {
     "name": "backend",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
     "scripts": {
         "test": "echo \\"Error: no test specified\\" && exit 1"
     },
@@ -10852,7 +10866,26 @@ var genTruffleDependScript = () => {
     "devDependencies": {
         "truffle": "^5.8.1",
         "@truffle/hdwallet-provider": "^2.1.9",
+        "@openzeppelin/contracts": "^4.8.2",
+        "dotenv": "^16.0.3",
         "web3": "^1.9.0"
+    }
+}`.trim();
+};
+var genFoundryDependScript = () => {
+  return `
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "test": "echo \\"Error: no test specified\\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@openzeppelin/contracts": "^4.8.2"
     }
 }`.trim();
 };
@@ -10865,6 +10898,8 @@ var createDepend = (backendFolder, frameName) => {
     case "Truffle":
       content = genTruffleDependScript();
       break;
+    case "Foundry":
+      content = genFoundryDependScript();
   }
   dependFile = "package.json";
   const writeStream = import_fs5.default.createWriteStream(
@@ -10884,6 +10919,30 @@ var createTest = (backendFolder, frameName) => {
   }
 };
 
+// scripts/util/env.js
+var import_path7 = __toESM(require("path"), 1);
+var import_fs7 = __toESM(require("fs"), 1);
+var generateEnvFile = () => {
+  return `
+PRIVATE_KEY=""
+HUAWEI_CERT_KEY=""
+ETHERSCAN_API_KEY=""
+`.trim();
+};
+var createEnv = (backendFolder, frameName) => {
+  if (frameName == "Foundry") {
+    return;
+  }
+  let content;
+  content = generateEnvFile();
+  envFile = ".env";
+  const writeStream = import_fs7.default.createWriteStream(
+    import_path7.default.join(backendFolder, envFile)
+  );
+  writeStream.write(content);
+  writeStream.end();
+};
+
 // scripts/workflow/select.js
 var selectProjectName = async () => {
   const projectName2 = await (0, import_prompts.default)({
@@ -10892,8 +10951,8 @@ var selectProjectName = async () => {
     message: "Please input the project name you want create",
     initial: "my-dapp"
   }, { onCancel }).then((data) => data.name);
-  if (!(0, import_fs7.existsSync)(import_path7.default.join(process.cwd(), projectName2))) {
-    mkdir(import_path7.default.join(process.cwd(), projectName2));
+  if (!(0, import_fs8.existsSync)(import_path8.default.join(process.cwd(), projectName2))) {
+    mkdir(import_path8.default.join(process.cwd(), projectName2));
   }
   return projectName2;
 };
@@ -10910,8 +10969,8 @@ var selectProjectType = async () => {
   return projectType;
 };
 var selectBackendFrame = async (projectPath) => {
-  if (!(0, import_fs7.existsSync)(import_path7.default.join(projectPath, "backend"))) {
-    mkdir(import_path7.default.join(projectPath, "backend"));
+  if (!(0, import_fs8.existsSync)(import_path8.default.join(projectPath, "backend"))) {
+    mkdir(import_path8.default.join(projectPath, "backend"));
   }
   const backendFrame = await (0, import_prompts.default)({
     type: "select",
@@ -10919,7 +10978,7 @@ var selectBackendFrame = async (projectPath) => {
     message: "Please select the BackendFrame you want create",
     choices: [
       { title: "Hardhat", value: "Hardhat" },
-      { title: "Foundry", value: "Foundry", disabled: true, warn: "will be supported soon" },
+      { title: "Foundry", value: "Foundry" },
       { title: "Truffle", value: "Truffle", disabled: true }
     ]
   }, { onCancel }).then((data) => data.backendFrame);
@@ -10992,11 +11051,12 @@ var selectContract = async (projectPath, backendFrame, networkName) => {
     default:
       break;
   }
-  createContract(import_path7.default.join(projectPath, "backend"), contract, contractInfo);
-  createDeploy(import_path7.default.join(projectPath, "backend"), backendFrame, contractInfo.name);
-  createConfig(import_path7.default.join(projectPath, "backend"), backendFrame, networkName);
-  createDepend(import_path7.default.join(projectPath, "backend"), backendFrame);
-  createTest(import_path7.default.join(projectPath, "backend"), backendFrame);
+  createContract(import_path8.default.join(projectPath, "backend"), contract, contractInfo);
+  createDeploy(import_path8.default.join(projectPath, "backend"), backendFrame, contractInfo.name);
+  createConfig(import_path8.default.join(projectPath, "backend"), backendFrame, networkName);
+  createDepend(import_path8.default.join(projectPath, "backend"), backendFrame);
+  createTest(import_path8.default.join(projectPath, "backend"), backendFrame);
+  createEnv(import_path8.default.join(projectPath, "backend"), backendFrame);
 };
 var selectERC20 = async () => {
   const erc202 = await (0, import_prompts.default)([
@@ -11108,7 +11168,7 @@ var createDappProject = async () => {
   try {
     projectName = await selectProjectName();
     const projectType = await selectProjectType();
-    await createProject(projectType, import_path8.default.join(process.cwd(), projectName));
+    await createProject(projectType, import_path9.default.join(process.cwd(), projectName));
   } catch (error) {
     onDelete(projectName);
     console.log(error);

@@ -1,5 +1,5 @@
 import path from "path";
-import fs, {existsSync} from "fs";
+import fs from "fs";
 
 const genHardhatConfigScript = (network) => {
     return `
@@ -9,17 +9,17 @@ require("dotenv").config();
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
-const HW_TOKEN = process.env.HW_TOKEN || '';
+const HUAWEI_CERT_KEY = process.env.HUAWEI_CERT_KEY || '';
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: "0.8.17",
-    // networks: {
-    //     ${network}: {
-    //         url: "",
-    //         accounts: [PRIVATE_KEY],
-    //         httpHeaders: {"X-Auth-Token": HW_TOKEN}
-    //     },
-    // }
+    networks: {
+        ${network}: {
+            // url: HUAWEI_CERT_KEY,
+            // accounts: [PRIVATE_KEY],
+            // httpHeaders: {"X-Auth-Token": HW_TOKEN}
+        },
+    }
 };`.trim();
 };
 
@@ -67,6 +67,17 @@ module.exports = {
 };`.trim();
 };
 
+const genFoundryConfigScript = () => {
+    return `
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['lib', 'node_modules']
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+`.trim();
+};
+
 const createConfig = (backendFolder, frameName, networkName) => {
     let content, configFile;
     switch (frameName) {
@@ -77,6 +88,10 @@ const createConfig = (backendFolder, frameName, networkName) => {
         case 'Truffle' : 
             content = genTruffleConfigScript(networkName);
             configFile = "truffle-config.js";
+            break;
+        case 'Foundry' : 
+            content = genFoundryConfigScript();
+            configFile = "foundry.toml";
             break;
     }
     const writeStream = fs.createWriteStream(

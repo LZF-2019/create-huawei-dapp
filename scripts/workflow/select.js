@@ -8,6 +8,7 @@ import { createDeploy } from '../util/deploy.js';
 import { createConfig } from '../util/config.js';
 import { createDepend } from '../util/depend.js';
 import { createTest } from '../util/test.js';
+import { createEnv } from '../util/env.js';
 
 const selectProjectName = async () => {
     const projectName = await prompts({
@@ -45,7 +46,7 @@ const selectBackendFrame = async (projectPath) => {
         message: "Please select the BackendFrame you want create",
         choices: [
             { title: 'Hardhat', value: 'Hardhat' },
-            { title: 'Foundry', value: 'Foundry' , disabled: true, warn: "will be supported soon"},
+            { title: 'Foundry', value: 'Foundry' },
             { title: 'Truffle', value: 'Truffle' , disabled: true}
         ],
     }, { onCancel }).then((data) => data.backendFrame);
@@ -124,6 +125,7 @@ const selectContract = async(projectPath, backendFrame, networkName) => {
     createConfig(path.join(projectPath, "backend"), backendFrame, networkName);
     createDepend(path.join(projectPath, "backend"), backendFrame);
     createTest(path.join(projectPath, "backend"), backendFrame);
+    createEnv(path.join(projectPath, "backend"), backendFrame);
 };
 
 const selectERC20 = async() => {

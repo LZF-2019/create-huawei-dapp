@@ -40,6 +40,8 @@ export const createDeploy = (backendFolder, frameName, contractName) => {
             deployPath = path.join(backendFolder, "migrations");
             deployFile = "1_migration.js";
             break;
+        case 'Foundry' : 
+            return;
     }
     if (!existsSync(deployPath)) {
         mkdir(deployPath);

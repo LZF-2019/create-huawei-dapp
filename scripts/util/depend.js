@@ -1,5 +1,5 @@
 import path from "path";
-import fs, {existsSync} from "fs";
+import fs from "fs";
 
 const genHardhatDependScript = () => {
     return `
@@ -7,7 +7,6 @@ const genHardhatDependScript = () => {
     "name": "backend",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
     "scripts": {
         "test": "echo \\"Error: no test specified\\" && exit 1"
     },
@@ -30,7 +29,6 @@ const genTruffleDependScript = () => {
     "name": "backend",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
     "scripts": {
         "test": "echo \\"Error: no test specified\\" && exit 1"
     },
@@ -40,7 +38,27 @@ const genTruffleDependScript = () => {
     "devDependencies": {
         "truffle": "^5.8.1",
         "@truffle/hdwallet-provider": "^2.1.9",
+        "@openzeppelin/contracts": "^4.8.2",
+        "dotenv": "^16.0.3",
         "web3": "^1.9.0"
+    }
+}`.trim();
+};
+
+const genFoundryDependScript = () => {
+    return `
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "test": "echo \\"Error: no test specified\\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@openzeppelin/contracts": "^4.8.2"
     }
 }`.trim();
 };
@@ -54,6 +72,8 @@ export const createDepend = (backendFolder, frameName) => {
         case 'Truffle' : 
             content = genTruffleDependScript();
             break;
+        case 'Foundry' : 
+            content = genFoundryDependScript();
     }
     dependFile = "package.json"
     const writeStream = fs.createWriteStream(
