@@ -47,7 +47,7 @@ const selectBackendFrame = async (projectPath) => {
         choices: [
             { title: 'Hardhat', value: 'Hardhat' },
             { title: 'Foundry', value: 'Foundry' },
-            { title: 'Truffle', value: 'Truffle' , disabled: true}
+            { title: 'Truffle', value: 'Truffle' }
         ],
     }, { onCancel }).then((data) => data.backendFrame);
     return backendFrame; 
@@ -105,8 +105,9 @@ const selectContract = async(projectPath, backendFrame, networkName) => {
             { title: 'default', value: 'default' },
         ],
     }, { onCancel }).then((data) => data.contract);
-    let contractInfo;
-    contractInfo = {"name": "Simple"};
+
+    let contractInfo = {"name": "Simple"};
+    let backendFolder = path.join(projectPath, "backend");
     switch (contract) {
         case 'ERC20' : 
             contractInfo = await selectERC20();
@@ -120,12 +121,13 @@ const selectContract = async(projectPath, backendFrame, networkName) => {
         default :  
             break;
     }
-    createContract(path.join(projectPath, "backend"), contract, contractInfo);
-    createDeploy(path.join(projectPath, "backend"), backendFrame, contractInfo.name);
-    createConfig(path.join(projectPath, "backend"), backendFrame, networkName);
-    createDepend(path.join(projectPath, "backend"), backendFrame);
-    createTest(path.join(projectPath, "backend"), backendFrame);
-    createEnv(path.join(projectPath, "backend"), backendFrame);
+    
+    createContract(backendFolder, contract, contractInfo);
+    createDeploy(backendFolder, backendFrame, contractInfo.name);
+    createConfig(backendFolder, backendFrame, networkName);
+    createDepend(backendFolder, backendFrame);
+    createTest(backendFolder, backendFrame);
+    createEnv(backendFolder, backendFrame);
 };
 
 const selectERC20 = async() => {

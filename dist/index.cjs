@@ -10737,27 +10737,25 @@ require("dotenv").config();
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
-const HUAWEI_CERT_KEY = process.env.HUAWEI_CERT_KEY || '';
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: "0.8.17",
     networks: {
         ${network}: {
-            // url: HUAWEI_CERT_KEY,
-            // accounts: [PRIVATE_KEY],
-            // httpHeaders: {"X-Auth-Token": HW_TOKEN}
+            url: process.env.ROPSTEN_URL || "",
+            accounts: process.env.PRIVATE_KEY !== '' ? [process.env.PRIVATE_KEY] : []
         },
-    }
+    },
+    etherscan: {
+        apiKey: process.env.ETHERSCAN_API_KEY,
+    },
 };`.trim();
 };
 var genTruffleConfigScript = (network) => {
   return `
 require('dotenv').config();
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-const PROJECT_ID = process.env.PROJECT_ID || '';
-const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
-const HW_TOKEN = process.env.HW_TOKEN || '';
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
@@ -10768,15 +10766,15 @@ module.exports = {
             port: 7545,            // Standard Ethereum port (default: none)
             network_id: "5777",       // Any network (default: none)
         },
-        // ${network}: {
-        //     provider: function() {
-        //         return new HDWalletProvider({
-        //             privateKeys: [PRIVATE_KEY], 
-        //             providerOrUrl: ""
-        //         })
-        //     },
-        //     network_id: '*',
-        // }
+        ${network}: {
+            provider: function() {
+                return new HDWalletProvider({
+                    privateKeys: process.env.PRIVATE_KEY !== '' ? [process.env.PRIVATE_KEY] : [], 
+                    providerOrUrl: process.env.HUAWEI_URL
+                })
+            },
+            network_id: '*',
+        }
     },
     // Configure your compilers
     compilers: {
@@ -10924,18 +10922,17 @@ var import_path7 = __toESM(require("path"), 1);
 var import_fs7 = __toESM(require("fs"), 1);
 var generateEnvFile = () => {
   return `
-PRIVATE_KEY=""
-HUAWEI_CERT_KEY=""
-ETHERSCAN_API_KEY=""
+PRIVATE_KEY=
+HUAWEI_URL=
+ETHERSCAN_API_KEY=
 `.trim();
 };
 var createEnv = (backendFolder, frameName) => {
   if (frameName == "Foundry") {
     return;
   }
-  let content;
-  content = generateEnvFile();
-  envFile = ".env";
+  let content = generateEnvFile();
+  let envFile = ".env";
   const writeStream = import_fs7.default.createWriteStream(
     import_path7.default.join(backendFolder, envFile)
   );
@@ -10979,7 +10976,7 @@ var selectBackendFrame = async (projectPath) => {
     choices: [
       { title: "Hardhat", value: "Hardhat" },
       { title: "Foundry", value: "Foundry" },
-      { title: "Truffle", value: "Truffle", disabled: true }
+      { title: "Truffle", value: "Truffle" }
     ]
   }, { onCancel }).then((data) => data.backendFrame);
   return backendFrame;
@@ -11036,8 +11033,8 @@ var selectContract = async (projectPath, backendFrame, networkName) => {
       { title: "default", value: "default" }
     ]
   }, { onCancel }).then((data) => data.contract);
-  let contractInfo;
-  contractInfo = { "name": "Simple" };
+  let contractInfo = { "name": "Simple" };
+  let backendFolder = import_path8.default.join(projectPath, "backend");
   switch (contract) {
     case "ERC20":
       contractInfo = await selectERC20();
@@ -11051,12 +11048,12 @@ var selectContract = async (projectPath, backendFrame, networkName) => {
     default:
       break;
   }
-  createContract(import_path8.default.join(projectPath, "backend"), contract, contractInfo);
-  createDeploy(import_path8.default.join(projectPath, "backend"), backendFrame, contractInfo.name);
-  createConfig(import_path8.default.join(projectPath, "backend"), backendFrame, networkName);
-  createDepend(import_path8.default.join(projectPath, "backend"), backendFrame);
-  createTest(import_path8.default.join(projectPath, "backend"), backendFrame);
-  createEnv(import_path8.default.join(projectPath, "backend"), backendFrame);
+  createContract(backendFolder, contract, contractInfo);
+  createDeploy(backendFolder, backendFrame, contractInfo.name);
+  createConfig(backendFolder, backendFrame, networkName);
+  createDepend(backendFolder, backendFrame);
+  createTest(backendFolder, backendFrame);
+  createEnv(backendFolder, backendFrame);
 };
 var selectERC20 = async () => {
   const erc202 = await (0, import_prompts.default)([

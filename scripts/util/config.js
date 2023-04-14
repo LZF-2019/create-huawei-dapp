@@ -8,28 +8,26 @@ require("dotenv").config();
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
-const HUAWEI_CERT_KEY = process.env.HUAWEI_CERT_KEY || '';
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: "0.8.17",
     networks: {
         ${network}: {
-            // url: HUAWEI_CERT_KEY,
-            // accounts: [PRIVATE_KEY],
-            // httpHeaders: {"X-Auth-Token": HW_TOKEN}
+            url: process.env.ROPSTEN_URL || "",
+            accounts: process.env.PRIVATE_KEY !== '' ? [process.env.PRIVATE_KEY] : []
         },
-    }
+    },
+    etherscan: {
+        apiKey: process.env.ETHERSCAN_API_KEY,
+    },
 };`.trim();
 };
 
 const genTruffleConfigScript = (network) => {
     return `
 require('dotenv').config();
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-const PROJECT_ID = process.env.PROJECT_ID || '';
-const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
-const HW_TOKEN = process.env.HW_TOKEN || '';
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
@@ -40,15 +38,15 @@ module.exports = {
             port: 7545,            // Standard Ethereum port (default: none)
             network_id: "5777",       // Any network (default: none)
         },
-        // ${network}: {
-        //     provider: function() {
-        //         return new HDWalletProvider({
-        //             privateKeys: [PRIVATE_KEY], 
-        //             providerOrUrl: ""
-        //         })
-        //     },
-        //     network_id: '*',
-        // }
+        ${network}: {
+            provider: function() {
+                return new HDWalletProvider({
+                    privateKeys: process.env.PRIVATE_KEY !== '' ? [process.env.PRIVATE_KEY] : [], 
+                    providerOrUrl: process.env.HUAWEI_URL
+                })
+            },
+            network_id: '*',
+        }
     },
     // Configure your compilers
     compilers: {
