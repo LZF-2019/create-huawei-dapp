@@ -145,7 +145,7 @@ const selectERC20 = async() => {
             initial: "MTK",
         },
         {
-            type: "number",
+            type: "text",
             name: "premint",
             message: "Please input the erc20 premint you want create",
             initial: 0,

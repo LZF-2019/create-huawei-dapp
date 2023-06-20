@@ -17,7 +17,7 @@ const genERC20Contract = (erc20Info) => {
     erc20contractTemplate = erc20.print({
         name: erc20Info.name,
         symbol: erc20Info.symbol,
-        permint: erc20Info.permint,
+        premint: erc20Info.premint,
         mintable: existStr("Mintable", erc20Info.feature),
         burnable: existStr("Burnable", erc20Info.feature),
         pausable: existStr("Pausable", erc20Info.feature),
